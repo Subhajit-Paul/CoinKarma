@@ -19,9 +19,11 @@ object SmsParser {
 
     // Words that indicate a *debit* (we ignore credits).
     private val debitHints = listOf(
-        "debited", "spent", "paid", "purchase", "txn of", "withdrawn", "sent to", "transferred"
+        "debited", "spent", "paid", "purchase", "txn of", "withdrawn", "sent to", "transferred", "sent rs", "sent inr", "sent ₹"
     )
-    private val creditHints = listOf("credited", "received from", "refund")
+    // "credited to X" means money went TO a merchant (debit), not that your account was credited.
+    // Only treat as credit when "credited" is followed by account-related words.
+    private val creditHints = listOf("credited to your", "credited to a/c", "credited to account", "received from", "refund")
 
     // Merchant / VPA capture — rough; refine per format.
     private val merchantRx = Pattern.compile(

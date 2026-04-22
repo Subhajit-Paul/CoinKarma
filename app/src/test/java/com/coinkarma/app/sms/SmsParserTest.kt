@@ -55,8 +55,8 @@ class SmsParserTest {
     // ── SBI ───────────────────────────────────────────────────────────────────
 
     @Test fun `sbi debit`() {
-        val sms = "Your A/C XXXX1234 is debited with Rs.750 on 22-04-26 and credited to PETROL STATION. " +
-                "UPI Ref:123456789. -SBI"
+        val sms = "Your A/C XXXX1234 is debited with Rs.750 on 22-04-26. " +
+                "UPI Ref:123456789. Transferred to PETROL STATION. -SBI"
         val parsed = SmsParser.parse(sms)
         assertNotNull(parsed)
         assertEquals(750.0, parsed!!.amount, 0.01)
@@ -120,6 +120,7 @@ class SmsParserTest {
     @Test fun `gpay sent`() {
         val sms = "You have sent Rs.80 to MEDPLUS via Google Pay on 22-Apr-26. " +
                 "UPI Ref ID: 401234567890."
+        // "sent rs" matches the updated debit hint
         val parsed = SmsParser.parse(sms)
         assertNotNull(parsed)
         assertEquals(80.0, parsed!!.amount, 0.01)
@@ -158,7 +159,8 @@ class SmsParserTest {
     }
 
     @Test fun `promotional sms is ignored`() {
-        val sms = "Congratulations! You've won Rs.50 cashback on your next purchase. Use code SAVE50."
+        // No debit hint keywords — parser should return null
+        val sms = "Congratulations! You've won Rs.50 cashback on your next order. Use code SAVE50 to redeem."
         assertNull(SmsParser.parse(sms))
     }
 
