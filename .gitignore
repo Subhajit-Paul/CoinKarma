@@ -1,0 +1,38 @@
+# Claude Code — never commit
+.claude/
+CLAUDE.md
+
+# Gradle build outputs
+.gradle/
+build/
+app/build/
+**/build/
+
+# Local Android SDK config — each dev sets their own
+local.properties
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+.DS_Store
+
+# Kotlin incremental compilation cache
+**/.kotlin/
+
+# Signing keys — never commit
+*.jks
+*.keystore
+keystore.properties
+
+# Generated Room schemas (optional — include if you want schema history in VCS)
+# app/schemas/
+
+# OS
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Node (if any tooling is added later)
+node_modules/

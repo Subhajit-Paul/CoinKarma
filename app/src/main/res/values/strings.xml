@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CoinKarma</string>
+    <string name="channel_transactions">Transactions</string>
+    <string name="channel_transactions_desc">Alerts when we auto-detect a spend from SMS.</string>
+</resources>
