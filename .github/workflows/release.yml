@@ -5,12 +5,15 @@ on:
     tags:
       - 'v*'
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   release:
     name: Build & publish release
     runs-on: ubuntu-latest
     permissions:
-      contents: write   # needed to create a GitHub Release
+      contents: write
 
     steps:
       - name: Checkout
@@ -36,9 +39,8 @@ jobs:
         run: ./gradlew assembleRelease --no-daemon
 
       - name: Sign APK
-        # Signs with the debug keystore if no release keystore is configured.
-        # To use a real keystore, add KEYSTORE_FILE (base64), KEYSTORE_PASSWORD,
-        # KEY_ALIAS, and KEY_PASSWORD as repository secrets and update this step.
+        # To enable signing, add KEYSTORE_FILE (base64), KEYSTORE_PASSWORD,
+        # KEY_ALIAS, and KEY_PASSWORD as repository secrets.
         id: sign
         uses: r0adkll/sign-android-release@v1
         with:
@@ -49,7 +51,7 @@ jobs:
           keyPassword: ${{ secrets.KEY_PASSWORD }}
         env:
           BUILD_TOOLS_VERSION: "34.0.0"
-        continue-on-error: true   # falls back to unsigned if secrets not set
+        continue-on-error: true
 
       - name: Rename APK
         run: |
@@ -65,11 +67,9 @@ jobs:
           echo "APK_NAME=CoinKarma-${TAG}.apk" >> $GITHUB_ENV
 
       - name: Extract changelog for this version
-        id: changelog
         run: |
           TAG=${GITHUB_REF#refs/tags/v}
           awk "/^## \[${TAG}\]/{found=1; next} /^## \[/{found=0} found" CHANGELOG.md > release_notes.txt
-          cat release_notes.txt
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

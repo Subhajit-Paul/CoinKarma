@@ -28,7 +28,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.OpenInNew
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
@@ -224,7 +224,7 @@ fun ProfileScreen(db: CoinKarmaDatabase) {
                     Text("Developer · links", color = ck.textMuted, style = MaterialTheme.typography.bodySmall)
                 }
             }
-            Icon(Icons.Filled.OpenInNew, contentDescription = null, tint = ck.textDim, modifier = Modifier.size(16.dp))
+            Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null, tint = ck.textDim, modifier = Modifier.size(16.dp))
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -302,7 +302,7 @@ private fun CreditRow(link: CreditLink, onClick: () -> Unit) {
                 Text(link.label, color = ck.textMuted, style = MaterialTheme.typography.labelSmall)
                 Text(link.handle, color = ck.text, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
             }
-            Icon(Icons.Filled.OpenInNew, contentDescription = "Open", tint = ck.textDim, modifier = Modifier.size(14.dp))
+            Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = "Open", tint = ck.textDim, modifier = Modifier.size(14.dp))
         }
     }
 }

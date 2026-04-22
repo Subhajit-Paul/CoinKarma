@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.coinkarma.app.backup
 
 import android.content.Context
