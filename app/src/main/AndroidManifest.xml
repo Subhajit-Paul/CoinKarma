@@ -5,6 +5,8 @@
     <!-- SMS parsing -->
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
+    <!-- Required by lint: declare telephony optional so the app installs on non-phone devices -->
+    <uses-feature android:name="android.hardware.telephony" android:required="false" />
 
     <!-- Notifications (Android 13+) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
