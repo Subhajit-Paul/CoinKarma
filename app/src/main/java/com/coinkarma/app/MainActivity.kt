@@ -6,7 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import com.coinkarma.app.ui.CoinKarmaApp
+import com.coinkarma.app.nav.AppNavGraph
 import com.coinkarma.app.ui.theme.CoinKarmaTheme
 
 class MainActivity : ComponentActivity() {
@@ -16,8 +16,12 @@ class MainActivity : ComponentActivity() {
         val db = (application as CoinKarmaApp).db
         setContent {
             val profile by db.profile().observe().collectAsState(initial = null)
-            CoinKarmaTheme(dark = profile?.darkMode ?: true) {
-                CoinKarmaApp()
+            CoinKarmaTheme(
+                isDark     = profile?.darkMode ?: true,
+                paletteKey = if (profile?.darkMode != false) profile?.paletteDark ?: "forest"
+                             else profile?.paletteLight ?: "forest",
+            ) {
+                AppNavGraph()
             }
         }
     }

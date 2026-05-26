@@ -4,8 +4,12 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
-import com.coinkarma.app.backup.BackupWorker
 import com.coinkarma.app.data.CoinKarmaDatabase
+import com.coinkarma.app.data.profile.UserProfile
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 class CoinKarmaApp : Application() {
     val db by lazy { CoinKarmaDatabase.get(this) }
@@ -13,7 +17,16 @@ class CoinKarmaApp : Application() {
     override fun onCreate() {
         super.onCreate()
         createChannels()
-        BackupWorker.schedule(this)
+        initProfile()
+    }
+
+    private fun initProfile() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val profile = db.profile().observe().first()
+            if (profile == null) {
+                db.profile().upsert(UserProfile())
+            }
+        }
     }
 
     private fun createChannels() {

@@ -14,20 +14,22 @@ A personal finance tracker for Indian users built with Kotlin + Jetpack Compose.
 |:---:|:---:|:---:|
 | ![Quests](docs/screenshots/quests.png) | ![Profile](docs/screenshots/profile.png) | ![Log](docs/screenshots/log.png) |
 
-> Screenshots show the Forest dark palette (default). Light mode and other palettes are available via Profile → Dark mode toggle.
+> Screenshots show the Forest dark palette (default). Light mode and other palettes are available via Profile → Appearance.
 
 ---
 
 ## Features
 
-- **Aura ring** — animated `Canvas` arc that tracks today's spend vs your daily budget; pulses and shifts colour (green → amber → red) as the limit approaches
-- **SMS auto-detection** — reads Indian bank SMS (HDFC, ICICI, SBI, Axis, Kotak, PayTM, GPay) and inserts transactions automatically; runs entirely on-device, nothing is uploaded
-- **Manual log** — bottom sheet with amount keypad, 7-category emoji picker, and optional merchant note
-- **History** — transactions grouped by day with delete
-- **Insights** — weekly bar chart + per-category spend breakdown
-- **Quests** — gamified saving challenges (zero-spend days, category budgets) with rarity tiers and XP
-- **Google Drive backup** — exports the full Room database as JSON to the user's private `appDataFolder`; nightly sync via WorkManager on Wi-Fi
-- **Dark/light theme** — Forest palette by default; toggle from Profile, persisted to Room and applied live
+- **Aura ring** — animated `Canvas` arc that tracks today's spend vs your daily budget; pulses and shifts colour (green → amber → red) as the limit approaches.
+- **SMS auto-detection** — reads Indian bank SMS (HDFC, ICICI, SBI, Axis, Kotak, PayTM, GPay) and inserts transactions automatically; runs entirely on-device, nothing is uploaded.
+- **Quest Forge** — Forge your own custom quests with custom icons, durations (15–365 days), and spend caps. Earn XP and level up your Spender Archetype.
+- **Archetypes** — Choose from various spender archetypes (Zen Monk, Budget Ninja, Wealth Guardian) and personalize your profile with unique avatars.
+- **Premium Animations** — Smooth, rich transitions between tabs and interactive UI elements for a fluid experience.
+- **Manual log** — Bottom sheet with amount keypad, category picker, and optional merchant note.
+- **History** — Transactions grouped by day with swipe-to-delete.
+- **Insights** — Weekly bar chart + per-category spend breakdown.
+- **Manual backup** — Exports and imports the full Room database as a local CoinKarma JSON file, no account sign-in required.
+- **Multi-palette Theming** — Multiple beautiful color palettes (Forest, Cobalt, Sunset, Mint, Plum) available in both dark and light modes.
 
 ---
 
@@ -41,10 +43,8 @@ A personal finance tracker for Indian users built with Kotlin + Jetpack Compose.
 | Persistence | Room 2.6 (KSP) |
 | Async | Kotlin Coroutines + Flow |
 | Image loading | Coil 2 |
-| Background | WorkManager 2.9 |
-| Backup | Google Drive API v3 (`appDataFolder` scope) |
-| Auth | Google Sign-In (Play Services) |
-| Build | Kotlin 2.0.21, AGP 8.5, Gradle 8.9 |
+| Backup | Android document picker + JSON export/import |
+| Build | Kotlin 2.0.21, AGP 8.8, Gradle 8.9 |
 
 ---
 
@@ -54,66 +54,36 @@ A personal finance tracker for Indian users built with Kotlin + Jetpack Compose.
 CoinKarma/
 ├── .github/
 │   └── workflows/
-│       ├── ci.yml            # build + lint + unit tests on every push/PR
-│       └── release.yml       # builds release APK, creates GitHub Release on v* tag
+│       └── release.yml       # builds release APK & AAB, creates GitHub Release on v* tag
 ├── app/
 │   └── src/
 │       ├── main/
 │       │   ├── AndroidManifest.xml
 │       │   ├── java/com/coinkarma/app/
-│       │   │   ├── CoinKarmaApp.kt         # Application — DB init, notification channels, WorkManager schedule
+│       │   │   ├── CoinKarmaApp.kt         # Application — DB init, notification channels
 │       │   │   ├── MainActivity.kt         # Single activity — reads darkMode from DB, drives theme
-│       │   │   ├── backup/
-│       │   │   │   ├── BackupWorker.kt     # CoroutineWorker — nightly Drive backup, UNMETERED constraint
-│       │   │   │   └── DriveBackupManager.kt  # Sign-in, backupNow (JSON → appDataFolder), restoreNow + importJson
-│       │   │   ├── data/
-│       │   │   │   ├── CoinKarmaDatabase.kt   # Room @Database, version 1
-│       │   │   │   ├── Daos.kt                # TransactionDao, CustomQuestDao, UserProfileDao
-│       │   │   │   └── Entities.kt            # TransactionEntity, CustomQuestEntity, UserProfile
-│       │   │   ├── sms/
-│       │   │   │   ├── SmsParser.kt       # Regex heuristics for Indian bank SMS formats
-│       │   │   │   └── SmsReceiver.kt     # BroadcastReceiver → DAO insert → notification
+│       │   │   ├── nav/                    # Navigation graph and route definitions
+│       │   │   ├── data/                   # Data layer (Room entities, DAOs, Database)
+│       │   │   ├── platform/               # Platform services (SMS parsing, Backup, Receivers)
 │       │   │   └── ui/
-│       │   │       ├── CoinKarmaApp.kt    # Root composable — NavHost + bottom nav
-│       │   │       ├── challenges/
-│       │   │       │   ├── ChallengesScreen.kt
-│       │   │       │   └── ChallengesViewModel.kt
-│       │   │       ├── history/
-│       │   │       │   ├── HistoryScreen.kt
-│       │   │       │   └── HistoryViewModel.kt
-│       │   │       ├── home/
-│       │   │       │   ├── HomeScreen.kt       # Aura ring, stat pills, recent tx list
-│       │   │       │   └── HomeViewModel.kt
-│       │   │       ├── insights/
-│       │   │       │   ├── InsightsScreen.kt   # Weekly bar chart, category breakdown
-│       │   │       │   └── InsightsViewModel.kt
-│       │   │       ├── log/
-│       │   │       │   └── LogSheet.kt         # ModalBottomSheet — amount + category + note
-│       │   │       ├── profile/
-│       │   │       │   ├── ProfileScreen.kt    # Dark mode, budget, SMS toggle w/ rationale dialog
-│       │   │       │   └── ProfileViewModel.kt
-│       │   │       └── theme/
-│       │   │           ├── Theme.kt            # CkPalette, ForestDark/Light, CoinKarmaTheme
-│       │   │           └── Typography.kt       # Type scale (Space Grotesk / Inter / JetBrains Mono stubs)
+│       │   │       ├── atoms/              # Reusable low-level UI components (TabBar, etc.)
+│       │   │       ├── screens/            # Feature screens (Home, History, Quests, Profile, etc.)
+│       │   │       └── theme/              # Styling (Colors, Typography, Palettes, Icons)
 │       │   └── res/
 │       │       ├── values/
-│       │       │   ├── colors.xml    # XML colour aliases (used by the splash/status-bar theme)
+│       │       │   ├── colors.xml
 │       │       │   ├── strings.xml
-│       │       │   └── themes.xml    # NoActionBar XML theme for splash/status bar
-│       │       └── mipmap-*/         # Launcher icons (mdpi → xxxhdpi)
-│       └── test/
-│           └── java/com/coinkarma/app/sms/
-│               └── SmsParserTest.kt  # 16 unit-test fixtures (HDFC/ICICI/SBI/Axis/Kotak/PayTM/GPay)
+│       │       │   └── themes.xml
+│       │       └── mipmap-*/
+│       └── test/                     # Unit tests for business logic
 ├── gradle/
 │   └── wrapper/
 │       ├── gradle-wrapper.jar
-│       └── gradle-wrapper.properties  # Gradle 8.9
-├── build.gradle.kts      # Root build — plugin versions
-├── app/build.gradle.kts  # App module — all dependencies inlined
-├── settings.gradle.kts
-├── gradle.properties     # AndroidX, Kotlin code style flags
-├── gradlew               # Unix wrapper script
-├── CHANGELOG.md
+│       └── gradle-wrapper.properties
+├── build.gradle.kts      # Root build
+├── app/build.gradle.kts  # App module build
+├── gradle.properties     # Config flags
+├── gradlew               # Executable wrapper
 └── README.md
 ```
 
@@ -124,28 +94,8 @@ CoinKarma/
 | Tool | Version |
 |---|---|
 | JDK | 17 (Temurin / OpenJDK) |
-| Android SDK | Platform 34, Build-Tools 34.0.0 |
-| Gradle | 8.9 (via wrapper — no local install needed) |
-
-**Set `ANDROID_HOME`** to point at your SDK directory before building:
-
-```bash
-# Linux / macOS — add to ~/.bashrc or ~/.zshrc
-export ANDROID_HOME=$HOME/Android/Sdk
-export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
-```
-
-If you don't have the Android SDK, install the command-line tools:
-
-```bash
-# Download from https://developer.android.com/studio#command-line-tools-only
-# then:
-mkdir -p $HOME/Android/Sdk/cmdline-tools
-unzip commandlinetools-linux-*.zip -d $HOME/Android/Sdk/cmdline-tools/
-mv $HOME/Android/Sdk/cmdline-tools/cmdline-tools $HOME/Android/Sdk/cmdline-tools/latest
-
-sdkmanager "platforms;android-34" "build-tools;34.0.0" "platform-tools"
-```
+| Android SDK | Platform 36, Build-Tools 35.0.0 |
+| Gradle | 8.9 (via wrapper) |
 
 ---
 
@@ -154,91 +104,25 @@ sdkmanager "platforms;android-34" "build-tools;34.0.0" "platform-tools"
 ### Debug APK
 
 ```bash
-git clone https://github.com/subhajitp/CoinKarma.git
-cd CoinKarma
 ./gradlew assembleDebug
-# APK → app/build/outputs/apk/debug/app-debug.apk
+# Output: app/build/outputs/apk/debug/app-debug.apk
 ```
 
-### Install directly to a connected device
+### Release Artifacts
 
 ```bash
-./gradlew installDebug
+./gradlew assembleRelease bundleRelease
+# APK: app/build/outputs/apk/release/app-release-unsigned.apk
+# AAB: app/build/outputs/bundle/release/app-release.aab
 ```
 
-### Run unit tests
-
-```bash
-./gradlew testDebugUnitTest
-# Report → app/build/reports/tests/testDebugUnitTest/index.html
-```
-
-### Release APK
-
-```bash
-./gradlew assembleRelease
-# APK → app/build/outputs/apk/release/app-release-unsigned.apk
-```
-
-To sign the release APK, create `keystore.properties` in the project root (this file is gitignored):
-
-```properties
-storeFile=/path/to/your.jks
-storePassword=your_store_password
-keyAlias=your_key_alias
-keyPassword=your_key_password
-```
-
-Then update `app/build.gradle.kts` to wire the signing config (see the [Android signing docs](https://developer.android.com/studio/publish/app-signing)).
+To sign the release artifacts, configure `signingConfigs` in `app/build.gradle.kts` with your keystore credentials.
 
 ---
 
 ## Releases
 
-Releases are published automatically by the [release workflow](.github/workflows/release.yml) when a `v*` tag is pushed:
-
-```bash
-git tag v0.2.0
-git push origin v0.2.0
-```
-
-The workflow:
-1. Runs unit tests
-2. Builds a release APK
-3. Signs it (if `KEYSTORE_FILE`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD` secrets are set in the repo settings)
-4. Extracts the matching section from `CHANGELOG.md` as release notes
-5. Creates a GitHub Release and uploads the APK as an asset
-
-Download the latest APK from the [Releases page](https://github.com/subhajitp/CoinKarma/releases).
-
----
-
-## SMS permission note
-
-`RECEIVE_SMS` and `READ_SMS` are [restricted permissions](https://support.google.com/googleplay/android-developer/answer/9888170). If you publish to the Play Store:
-
-- Set the app category to **Finance → Personal Finance**
-- Justify the SMS use case in the Play Console declaration
-- The app already supports a fallback manual-entry-only mode — `SmsReceiver` simply won't fire if the user doesn't grant the permission
-
----
-
-## Google Drive backup
-
-Backup uses the `DRIVE_APPDATA` scope, which gives access only to a hidden `appDataFolder` folder invisible in the user's normal Drive UI. It does **not** trigger the broader Drive scope review.
-
-Backup is triggered:
-- Automatically each night by `BackupWorker` (requires unmetered network)
-- Manually from the Profile screen → Connect Google → Backup now *(UI not yet wired — PR welcome)*
-
----
-
-## Contributing
-
-1. Fork the repo and create a branch: `git checkout -b feature/your-feature`
-2. Follow the existing code style (no Hilt, no extra abstractions, one ViewModel per screen)
-3. Add or update unit tests for any logic changes
-4. Open a PR against `main`
+Releases are published automatically by the [release workflow](.github/workflows/release.yml) when a `v*` tag is pushed. The workflow generates both an APK and an AAB and uploads them to the GitHub release.
 
 ---
 

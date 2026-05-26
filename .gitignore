@@ -1,5 +1,7 @@
 # Claude Code — never commit
 .claude/
+.agents/
+.codex/
 CLAUDE.md
 
 # Gradle build outputs

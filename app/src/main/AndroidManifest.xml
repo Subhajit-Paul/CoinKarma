@@ -11,11 +11,6 @@
     <!-- Notifications (Android 13+) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-    <!-- Drive backup (network + account) -->
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
-
     <application
         android:name=".CoinKarmaApp"
         android:allowBackup="true"
@@ -40,7 +35,7 @@
 
         <!-- SMS transaction parser -->
         <receiver
-            android:name=".sms.SmsReceiver"
+            android:name=".platform.receivers.SmsReceiver"
             android:exported="true"
             android:permission="android.permission.BROADCAST_SMS">
             <intent-filter android:priority="999">
