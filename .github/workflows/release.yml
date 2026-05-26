@@ -40,7 +40,24 @@ jobs:
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/bundle/release/app-release.aab
 
-      - name: Create Release
+      - name: Create Rolling Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref == 'refs/heads/main'
+        with:
+          tag_name: rolling-release
+          name: Continuous Build (Latest)
+          body: |
+            This release contains the latest automated build from the `main` branch.
+            Last updated: ${{ github.event.head_commit.timestamp }}
+          files: |
+            app/build/outputs/apk/release/app-release.apk
+            app/build/outputs/bundle/release/app-release.aab
+          prerelease: true
+          make_latest: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Tagged Release
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
